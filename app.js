@@ -137,8 +137,11 @@ function normalizeLogs(value) {
             memo: typeof log.memo === "string" ? log.memo : "",
             createdAt: typeof log.createdAt === "string" ? log.createdAt : new Date().toISOString(),
             sets: log.sets
-              .map((set) => ({ weight: Number(set.weight) || 0, reps: Number(set.reps) || 0 }))
-              .filter((set) => set.weight >= 0 && set.reps > 0),
+              .map((set) => ({
+                weight: normalizeSetValue(set.weight),
+                reps: normalizeSetValue(set.reps),
+              }))
+              .filter((set) => set.weight !== null && set.reps !== null),
           }))
           .filter((log) => log.sets.length),
       ])
@@ -156,6 +159,12 @@ function normalizeExerciseSnapshot(value) {
     bodyRate: Number(value.bodyRate) >= 0 ? Number(value.bodyRate) : 100,
     bodyWeight: Number(value.bodyWeight) > 0 ? Number(value.bodyWeight) : 70,
   };
+}
+
+function normalizeSetValue(value) {
+  if (value === "" || value === null || value === undefined) return "";
+  const number = Number(value);
+  return Number.isFinite(number) && number >= 0 ? number : null;
 }
 
 function saveState() {
@@ -233,8 +242,10 @@ function calculateVolume(log) {
   const exercise = getLogExercise(log);
   const bodyWeight = Number(log.exerciseSnapshot?.bodyWeight || state.settings.bodyWeight) || 0;
   return log.sets.reduce((total, set) => {
-    const weight = exercise?.type === "bodyweight" ? bodyWeight * ((exercise.bodyRate || 100) / 100) + set.weight : set.weight;
-    return total + weight * set.reps;
+    const addedWeight = Number(set.weight) || 0;
+    const reps = Number(set.reps) || 0;
+    const weight = exercise?.type === "bodyweight" ? bodyWeight * ((exercise.bodyRate || 100) / 100) + addedWeight : addedWeight;
+    return total + weight * reps;
   }, 0);
 }
 
@@ -410,10 +421,10 @@ function renumberSets() {
 function readSets() {
   return [...els.setEditor.querySelectorAll(".set-row")]
     .map((row) => ({
-      weight: Number(row.querySelector(".set-weight").value) || 0,
-      reps: Number(row.querySelector(".set-reps").value) || 0,
+      weight: normalizeSetValue(row.querySelector(".set-weight").value.trim()),
+      reps: normalizeSetValue(row.querySelector(".set-reps").value.trim()),
     }))
-    .filter((set) => set.reps > 0);
+    .filter((set) => set.weight !== null && set.reps !== null);
 }
 
 function repeatPrevious() {
@@ -450,11 +461,14 @@ function deleteExercise(exerciseId) {
 }
 
 function formatSetLine(exercise, set) {
-  if (exercise.type !== "bodyweight") return `${set.weight || "-"} kg × ${set.reps} reps`;
+  const weight = Number(set.weight) || 0;
+  const weightLabel = set.weight === "" ? "-" : set.weight;
+  const repsLabel = set.reps === "" ? "未入力" : set.reps;
+  if (exercise.type !== "bodyweight") return `${weightLabel} kg × ${repsLabel} reps`;
   const bodyWeight = Number(exercise.bodyWeight || state.settings.bodyWeight) || 0;
   const base = bodyWeight * ((exercise.bodyRate || 100) / 100);
-  const extra = set.weight > 0 ? ` + ${set.weight}kg` : "";
-  return `自重${exercise.bodyRate}%${extra} × ${set.reps} reps（約${Math.round(base + set.weight)}kg）`;
+  const extra = weight > 0 ? ` + ${weight}kg` : "";
+  return `自重${exercise.bodyRate}%${extra} × ${repsLabel} reps（約${Math.round(base + weight)}kg）`;
 }
 
 function empty(text) {
@@ -497,10 +511,6 @@ els.recordForm.addEventListener("submit", (event) => {
   const exercise = getExercise(els.exerciseSelect.value);
   if (!exercise) {
     alert("先に種目を追加してください。");
-    return;
-  }
-  if (!sets.length) {
-    alert("回数を入力したセットが必要です。");
     return;
   }
   const log = {
