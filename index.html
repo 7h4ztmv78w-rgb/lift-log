@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f6f3ed" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="LIFT LOG" />
+    <title>LIFT LOG</title>
+    <link rel="manifest" href="./manifest.webmanifest?v=6" />
+    <link rel="apple-touch-icon" href="./icon-192.png" />
+    <link rel="stylesheet" href="./styles.css?v=6" />
+  </head>
+  <body>
+    <div class="phone-frame">
+      <main class="app-shell">
+        <header class="app-header">
+          <div>
+            <p class="overline">Local workout log</p>
+            <h1>LIFT LOG</h1>
+          </div>
+          <button class="ghost-button" id="todayButton" type="button">今日</button>
+        </header>
+
+        <section class="view is-active" id="view-calendar" aria-labelledby="calendarTitle">
+          <div class="month-bar">
+            <button class="icon-button" id="prevMonth" type="button" aria-label="前の月">‹</button>
+            <div>
+              <h2 id="calendarTitle">カレンダー</h2>
+              <p id="monthLabel" aria-live="polite"></p>
+            </div>
+            <button class="icon-button" id="nextMonth" type="button" aria-label="次の月">›</button>
+          </div>
+
+          <div class="weekday-row" aria-hidden="true">
+            <span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span><span>日</span>
+          </div>
+          <div class="calendar-grid" id="calendarGrid"></div>
+
+          <article class="day-summary">
+            <div>
+              <p class="overline">Selected</p>
+              <h3 id="selectedDateLabel"></h3>
+            </div>
+            <button class="primary-button compact" id="openRecordButton" type="button">記録する</button>
+          </article>
+
+          <div class="log-list" id="dayLogList"></div>
+        </section>
+
+        <section class="view" id="view-record" aria-labelledby="recordTitle">
+          <div class="section-title">
+            <div>
+              <p class="overline">Fast input</p>
+              <h2 id="recordTitle">トレーニング記録</h2>
+            </div>
+            <p id="recordDateLabel"></p>
+          </div>
+
+          <form class="record-form" id="recordForm">
+            <div class="part-filter" id="recordPartFilter" aria-label="部位で絞り込み"></div>
+
+            <label>
+              種目
+              <select id="exerciseSelect"></select>
+            </label>
+
+            <div class="quick-row">
+              <button class="chip-button" id="repeatPreviousButton" type="button">前回を入力</button>
+              <button class="chip-button" id="addExerciseShortcut" type="button">種目追加</button>
+            </div>
+
+            <div class="set-editor" id="setEditor"></div>
+            <button class="secondary-button" id="addSetButton" type="button">セットを追加</button>
+
+            <label>
+              メモ
+              <textarea id="memoInput" rows="3" placeholder="フォーム、痛み、次回の目標など"></textarea>
+            </label>
+
+            <button class="primary-button" type="submit">保存</button>
+          </form>
+        </section>
+
+        <section class="view" id="view-exercises" aria-labelledby="exerciseTitle">
+          <div class="section-title">
+            <div>
+              <p class="overline">Unlimited</p>
+              <h2 id="exerciseTitle">種目管理</h2>
+            </div>
+          </div>
+
+          <form class="exercise-form" id="exerciseForm">
+            <label>
+              体重 kg
+              <input id="bodyWeightInput" type="number" min="0" step="0.1" />
+            </label>
+            <label>
+              種目名
+              <input id="exerciseNameInput" type="text" placeholder="インクラインベンチプレス" autocomplete="off" required />
+            </label>
+            <div class="two-column">
+              <label>
+                部位
+                <select id="partInput"></select>
+              </label>
+              <label>
+                色
+                <input id="colorInput" type="color" value="#ff5a4f" />
+              </label>
+            </div>
+            <div class="two-column">
+              <label>
+                種別
+                <select id="typeInput">
+                  <option value="weight">ウェイト</option>
+                  <option value="bodyweight">自重</option>
+                </select>
+              </label>
+              <label>
+                自重負荷率 %
+                <input id="bodyRateInput" type="number" min="0" max="200" step="5" value="100" />
+              </label>
+            </div>
+            <button class="primary-button" type="submit">種目を追加</button>
+          </form>
+
+          <div class="exercise-list" id="exerciseList"></div>
+        </section>
+      </main>
+
+      <nav class="tab-bar" aria-label="メインナビゲーション">
+        <button class="tab-button is-active" type="button" data-view="calendar">カレンダー</button>
+        <button class="tab-button" type="button" data-view="record">記録</button>
+        <button class="tab-button" type="button" data-view="exercises">種目</button>
+      </nav>
+    </div>
+
+    <template id="setRowTemplate">
+      <div class="set-row">
+        <span class="set-number"></span>
+        <label>
+          kg
+          <input class="set-weight" type="number" min="0" step="0.5" inputmode="decimal" />
+        </label>
+        <label>
+          回
+          <input class="set-reps" type="number" min="0" step="1" inputmode="numeric" />
+        </label>
+        <button class="delete-set" type="button" aria-label="セットを削除">×</button>
+      </div>
+    </template>
+
+    <script src="./app.js?v=6"></script>
+  </body>
+</html>
