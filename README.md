@@ -29,18 +29,27 @@ http://localhost:4173/?v=6
 
 SafariでHTTPS配信されたURLを開き、「共有」から「ホーム画面に追加」するとアプリ風に起動できます。
 
+公開URL:
+
+```text
+https://7h4ztmv78w-rgb.github.io/lift-log/
+```
+
 `http://localhost:4173` はPC自身を指す開発用URLなので、iPhoneからは開けません。同じWi-Fi前提をやめるには、GitHub PagesなどのHTTPSホスティングに置きます。
 
 ## 同じWi-Fiなしで使う場合
 
-このリポジトリはGitHub Pagesへ自動公開できるように設定済みです。
+このリポジトリは `gh-pages` ブランチでGitHub Pagesへ公開します。
 
-1. このフォルダをGitHubリポジトリへpush
-2. GitHubのリポジトリ設定で `Settings` → `Pages`
-3. `Source` を `GitHub Actions` に設定
-4. `main` または `master` にpush
-5. Actions完了後に表示される `https://...github.io/.../` をiPhoneのSafariで開く
-6. 共有ボタン → `ホーム画面に追加`
+更新時は以下を実行します。
+
+```bash
+npm run build
+git subtree split --prefix www -b gh-pages
+git push -f origin gh-pages
+```
+
+iPhoneでは公開URLをSafariで開き、共有ボタン → `ホーム画面に追加` を選びます。
 
 以後は同じWi-Fiにいなくても開けます。データはiPhone側のSafari/PWA内 `localStorage` に保存されます。
 
